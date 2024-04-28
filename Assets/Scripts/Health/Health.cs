@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Windows;
 
 public class Health : MonoBehaviour
 {
     [Header("Health")]
     [SerializeField] private float startingHealth;
     public float currentHealth { get; private set; }
-    private Animator animatior;
+    private Animator animator;
     private bool dead;
 
     [Header("iFrames")]
@@ -19,7 +20,7 @@ public class Health : MonoBehaviour
     private void Awake()
     {
         currentHealth = startingHealth;
-        animatior = GetComponent<Animator>();
+        animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
@@ -29,12 +30,12 @@ public class Health : MonoBehaviour
         
         if (currentHealth > 0)
         {
-            animatior.SetTrigger("hurt");
+            animator.SetTrigger("hurt");
             StartCoroutine(Invulnerability());
         } else
         {
             if(!dead) {
-                animatior.SetTrigger("die");
+                animator.SetTrigger("die");
 
                 //Player
                 if (GetComponent<PlayerMovement>() != null)
@@ -63,6 +64,25 @@ public class Health : MonoBehaviour
                 dead = true;
             }
             
+        }
+    }
+
+    public void AddHealth(float value)
+    {
+        currentHealth = Mathf.Clamp(currentHealth + value, 0, startingHealth);
+    }
+
+    public void Respawn()
+    {
+        dead = false;
+        AddHealth(startingHealth);
+        animator.ResetTrigger("die");
+        animator.Play("idle");
+        StartCoroutine(Invulnerability());
+
+        if (GetComponent<PlayerMovement>() != null)
+        {
+            GetComponent<PlayerMovement>().enabled = true;
         }
     }
 
